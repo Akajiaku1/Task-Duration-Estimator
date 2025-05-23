@@ -1,0 +1,51 @@
+# Save this as task_duration_estimator_app.py and run with `streamlit run task_duration_estimator_app.py`
+
+import streamlit as st
+import pandas as pd
+
+st.set_page_config(page_title="Task Duration Estimator", layout="centered")
+
+def calculate_pert(optimistic, most_likely, pessimistic):
+    return round((optimistic + 4 * most_likely + pessimistic) / 6, 2)
+
+st.title("🔧 Task Duration Estimator using PERT")
+st.write("Estimate task durations using the PERT formula: `Expected Time = (O + 4M + P) / 6`")
+
+# Initialize session state
+if 'tasks' not in st.session_state:
+    st.session_state.tasks = []
+
+with st.form("task_form"):
+    st.subheader("Enter New Task")
+    task_name = st.text_input("Task Name")
+    optimistic = st.number_input("Optimistic Time (O)", min_value=0.0, value=1.0)
+    most_likely = st.number_input("Most Likely Time (M)", min_value=0.0, value=2.0)
+    pessimistic = st.number_input("Pessimistic Time (P)", min_value=0.0, value=3.0)
+
+    submitted = st.form_submit_button("Add Task")
+    if submitted:
+        if task_name.strip():
+            estimate = calculate_pert(optimistic, most_likely, pessimistic)
+            st.session_state.tasks.append({
+                "Task": task_name.strip(),
+                "Optimistic": optimistic,
+                "Most Likely": most_likely,
+                "Pessimistic": pessimistic,
+                "Estimated Duration": estimate
+            })
+            st.success(f"Added '{task_name}' with estimated duration {estimate} hours")
+        else:
+            st.error("Task name cannot be empty.")
+
+if st.session_state.tasks:
+    df = pd.DataFrame(st.session_state.tasks)
+    st.subheader("📋 Estimated Task Durations")
+    st.dataframe(df.set_index("Task"), use_container_width=True)
+
+    total_duration = df["Estimated Duration"].sum()
+    st.write(f"✅ **Total Estimated Project Duration:** {round(total_duration, 2)} hours")
+
+    if st.button("Reset Tasks"):
+        st.session_state.tasks = []
+        st.success("All tasks cleared.")
+
