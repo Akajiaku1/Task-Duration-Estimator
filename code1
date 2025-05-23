@@ -1,0 +1,47 @@
+def calculate_pert_estimate(optimistic, most_likely, pessimistic):
+    """Calculate expected task duration using the PERT formula."""
+    return round((optimistic + 4 * most_likely + pessimistic) / 6, 2)
+
+
+def input_tasks():
+    """Prompt user to input tasks and durations."""
+    tasks = []
+    while True:
+        print("\nEnter task details (or type 'done' to finish):")
+        task_name = input("Task Name: ")
+        if task_name.lower() == 'done':
+            break
+        try:
+            optimistic = float(input("Optimistic time (O): "))
+            most_likely = float(input("Most Likely time (M): "))
+            pessimistic = float(input("Pessimistic time (P): "))
+        except ValueError:
+            print("Invalid input. Please enter numeric values.")
+            continue
+
+        estimate = calculate_pert_estimate(optimistic, most_likely, pessimistic)
+        tasks.append((task_name, estimate))
+
+    return tasks
+
+
+def display_estimates(tasks):
+    print("\nEstimated Task Durations (in hours):")
+    total = 0
+    for name, duration in tasks:
+        print(f" - {name}: {duration} hours")
+        total += duration
+    print(f"\nTotal Estimated Project Duration: {round(total, 2)} hours")
+
+
+def main():
+    print("🔧 Task Duration Estimator using PERT Method")
+    tasks = input_tasks()
+    if tasks:
+        display_estimates(tasks)
+    else:
+        print("No tasks entered.")
+
+
+if __name__ == "__main__":
+    main()
